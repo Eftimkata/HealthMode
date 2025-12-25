@@ -6,14 +6,11 @@
   <title>HealthMode – Daily Tracker</title>
   <meta name="description" content="Healthy lifestyle tracker for water, distance, weight and custom habits." />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body data-theme="dark">
   <header class="app-header">
     <div class="app-header-top">
-      <div>
-        <h1>HealthMode</h1>
-        <p class="tagline">Light, simple tracking for everyday habits</p>
-      </div>
       <div class="theme-toggle" aria-label="Appearance">
         <button type="button" class="theme-toggle-btn" data-theme-choice="light">Light</button>
         <button type="button" class="theme-toggle-btn is-active" data-theme-choice="dark">Dark</button>
@@ -22,27 +19,30 @@
   </header>
 
   <main class="app-main">
-    <!-- Main menu -->
-    <section id="screen-main" class="screen screen--active" aria-label="Main menu">
-      <h2 class="screen-title">Main menu</h2>
-      <div class="main-menu-grid">
-        <button type="button" class="menu-card" data-go-screen="water">
-          <span class="menu-title">Water</span>
-          <span class="menu-subtitle" id="menu-water-summary">Set your daily water goal</span>
-        </button>
-        <button type="button" class="menu-card" data-go-screen="distance">
-          <span class="menu-title">Distance</span>
-          <span class="menu-subtitle" id="menu-distance-summary">Track km per day</span>
-        </button>
-        <button type="button" class="menu-card" data-go-screen="weight">
-          <span class="menu-title">Weight loss</span>
-          <span class="menu-subtitle" id="menu-weight-summary">Log your weight by week</span>
-        </button>
-        <button type="button" class="menu-card" data-go-screen="custom">
-          <span class="menu-title">Custom habits</span>
-          <span class="menu-subtitle" id="menu-custom-summary">Create your own trackers</span>
-        </button>
+    <section class="activity-rings" aria-label="Today summary">
+      <div class="activity-rings-inner">
+        <svg class="activity-rings-svg" viewBox="0 0 176 176" aria-hidden="true">
+          <g transform="rotate(-90 88 88)">
+            <circle class="ring-bg ring-bg--distance" cx="88" cy="88" r="79" />
+            <circle class="ring-fg ring-fg--distance" cx="88" cy="88" r="79" id="ring-distance" />
+
+            <circle class="ring-bg ring-bg--water" cx="88" cy="88" r="62" />
+            <circle class="ring-fg ring-fg--water" cx="88" cy="88" r="62" id="ring-water" />
+
+            <circle class="ring-bg ring-bg--custom" cx="88" cy="88" r="44" id="ring-custom-bg" />
+            <circle class="ring-fg ring-fg--custom" cx="88" cy="88" r="44" id="ring-custom" />
+          </g>
+        </svg>
+        <div class="activity-rings-text">
+          <div class="ring-row ring-row--distance" id="ring-distance-text"></div>
+          <div class="ring-row ring-row--water" id="ring-water-text"></div>
+          <div class="ring-row ring-row--custom" id="ring-custom-text"></div>
+        </div>
       </div>
+    </section>
+
+    <!-- Main screen (empty, navigation is via bottom pill) -->
+    <section id="screen-main" class="screen screen--active" aria-label="Main menu">
     </section>
 
     <!-- Water tracker -->
@@ -208,6 +208,51 @@
       </section>
     </section>
   </main>
+
+  <section class="brand-bar" aria-label="App title">
+    <div>
+      <div class="brand-title">Health Mode</div>
+      <p class="brand-subtitle">Light, simple tracking for everyday habits</p>
+    </div>
+  </section>
+
+  <nav class="bottom-carousel" aria-label="Section switcher">
+    <div class="bottom-carousel-inner">
+      <div class="bottom-carousel-pill" style="--active-index: 0">
+        <div class="bottom-carousel-indicator"></div>
+
+        <button type="button" class="bottom-item bottom-item--home is-active" data-go-screen="main" data-index="0">
+          <span class="bottom-icon bottom-icon--home" aria-label="Home">
+            <i class="fa-solid fa-house"></i>
+          </span>
+        </button>
+
+        <button type="button" class="bottom-item bottom-item--water" data-go-screen="water" data-index="1">
+          <span class="bottom-icon bottom-icon--water" aria-label="Water">
+            <i class="fa-solid fa-glass-water"></i>
+          </span>
+        </button>
+
+        <button type="button" class="bottom-item bottom-item--distance" data-go-screen="distance" data-index="2">
+          <span class="bottom-icon bottom-icon--distance" aria-label="Distance">
+            <i class="fa-solid fa-person-walking"></i>
+          </span>
+        </button>
+
+        <button type="button" class="bottom-item bottom-item--weight" data-go-screen="weight" data-index="3">
+          <span class="bottom-icon bottom-icon--weight" aria-label="Weight loss">
+            <i class="fa-solid fa-weight-scale"></i>
+          </span>
+        </button>
+
+        <button type="button" class="bottom-item bottom-item--custom" data-go-screen="custom" data-index="4">
+          <span class="bottom-icon bottom-icon--custom" aria-label="Custom habits">
+            <i class="fa-solid fa-hashtag"></i>
+          </span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
   <footer class="app-footer">
     <span class="footer-text">Data is stored only on this device.</span>
