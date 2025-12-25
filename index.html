@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealthMode – Daily Tracker</title>
+  <meta name="description" content="Healthy lifestyle tracker for water, distance, weight and custom habits." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="dark">
+  <header class="app-header">
+    <div class="app-header-top">
+      <div>
+        <h1>HealthMode</h1>
+        <p class="tagline">Light, simple tracking for everyday habits</p>
+      </div>
+      <div class="theme-toggle" aria-label="Appearance">
+        <button type="button" class="theme-toggle-btn" data-theme-choice="light">Light</button>
+        <button type="button" class="theme-toggle-btn is-active" data-theme-choice="dark">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Main menu -->
+    <section id="screen-main" class="screen screen--active" aria-label="Main menu">
+      <h2 class="screen-title">Main menu</h2>
+      <div class="main-menu-grid">
+        <button type="button" class="menu-card" data-go-screen="water">
+          <span class="menu-title">Water</span>
+          <span class="menu-subtitle" id="menu-water-summary">Set your daily water goal</span>
+        </button>
+        <button type="button" class="menu-card" data-go-screen="distance">
+          <span class="menu-title">Distance</span>
+          <span class="menu-subtitle" id="menu-distance-summary">Track km per day</span>
+        </button>
+        <button type="button" class="menu-card" data-go-screen="weight">
+          <span class="menu-title">Weight loss</span>
+          <span class="menu-subtitle" id="menu-weight-summary">Log your weight by week</span>
+        </button>
+        <button type="button" class="menu-card" data-go-screen="custom">
+          <span class="menu-title">Custom habits</span>
+          <span class="menu-subtitle" id="menu-custom-summary">Create your own trackers</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Water tracker -->
+    <section id="screen-water" class="screen" aria-label="Water tracker">
+      <header class="screen-header">
+        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <h2>Water</h2>
+      </header>
+
+      <section class="card" aria-labelledby="water-heading">
+        <div class="card-header">
+          <h3 id="water-heading">Daily water</h3>
+          <span class="card-unit">ml</span>
+        </div>
+        <div class="card-body">
+          <label class="field">
+            <span>Goal</span>
+            <input type="number" id="water-goal" min="0" step="50" />
+          </label>
+          <label class="field">
+            <span>Today</span>
+            <input type="number" id="water-today" min="0" step="50" />
+          </label>
+          <div class="quick-buttons" aria-label="Quick add water">
+            <button type="button" data-add-water="250">+250</button>
+            <button type="button" data-add-water="500">+500</button>
+          </div>
+          <div class="progress" aria-hidden="true">
+            <div class="progress-fill" id="water-progress"></div>
+          </div>
+          <button type="button" id="water-reset" class="link-button">Reset today</button>
+        </div>
+      </section>
+
+      <section class="card calendar-card" aria-label="Water calendar">
+        <div class="card-header">
+          <h3>Water calendar</h3>
+        </div>
+        <p class="card-helper">A day gets a check when you hit your goal.</p>
+        <div class="calendar" id="water-calendar">
+          <div class="calendar-header">
+            <span class="calendar-title" id="water-calendar-title"></span>
+          </div>
+          <div class="calendar-grid" id="water-calendar-grid"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Distance tracker -->
+    <section id="screen-distance" class="screen" aria-label="Distance tracker">
+      <header class="screen-header">
+        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <h2>Distance</h2>
+      </header>
+
+      <section class="card" aria-labelledby="distance-heading">
+        <div class="card-header">
+          <h3 id="distance-heading">Daily distance</h3>
+          <span class="card-unit">km</span>
+        </div>
+        <div class="card-body">
+          <label class="field">
+            <span>Goal</span>
+            <input type="number" id="distance-goal" min="0" step="0.1" />
+          </label>
+          <label class="field">
+            <span>Today</span>
+            <input type="number" id="distance-today" min="0" step="0.1" />
+          </label>
+          <div class="quick-buttons" aria-label="Quick add distance">
+            <button type="button" data-add-distance="0.5">+0.5</button>
+            <button type="button" data-add-distance="1">+1</button>
+          </div>
+          <div class="progress" aria-hidden="true">
+            <div class="progress-fill" id="distance-progress"></div>
+          </div>
+          <button type="button" id="distance-reset" class="link-button">Reset today</button>
+        </div>
+      </section>
+
+      <section class="card calendar-card" aria-label="Distance calendar">
+        <div class="card-header">
+          <h3>Distance calendar</h3>
+        </div>
+        <p class="card-helper">A day gets a check when you hit your goal.</p>
+        <div class="calendar" id="distance-calendar">
+          <div class="calendar-header">
+            <span class="calendar-title" id="distance-calendar-title"></span>
+          </div>
+          <div class="calendar-grid" id="distance-calendar-grid"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Weight loss tracker -->
+    <section id="screen-weight" class="screen" aria-label="Weight loss tracker">
+      <header class="screen-header">
+        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <h2>Weight loss</h2>
+      </header>
+
+      <section class="card" aria-label="Weekly weight log">
+        <div class="card-header">
+          <h3>Weekly log</h3>
+          <span class="card-unit">kg</span>
+        </div>
+        <div class="card-body weight-grid">
+          <div class="weight-row weight-row--header">
+            <span>Week</span>
+            <span>Weight</span>
+          </div>
+          <div id="weight-weeks"></div>
+        </div>
+        <p class="card-helper">Use one row per week. You can overwrite values anytime.</p>
+      </section>
+    </section>
+
+    <!-- Custom trackers -->
+    <section id="screen-custom" class="screen" aria-label="Custom trackers">
+      <header class="screen-header">
+        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <h2>Custom habits</h2>
+      </header>
+
+      <section class="card" aria-label="Create custom tracker">
+        <div class="card-header">
+          <h3>Create a tracker</h3>
+        </div>
+        <div class="card-body">
+          <div class="field-group">
+            <label class="field">
+              <span>Name</span>
+              <input type="text" id="custom-name" maxlength="32" placeholder="Walked up stairs" />
+            </label>
+            <label class="field">
+              <span>Unit</span>
+              <input type="text" id="custom-unit" maxlength="16" placeholder="stairs" />
+            </label>
+            <label class="field">
+              <span>Goal</span>
+              <input type="number" id="custom-goal" min="0" step="1" />
+            </label>
+            <label class="field">
+              <span>Calendar</span>
+              <select id="custom-mode">
+                <option value="daily">Daily calendar</option>
+                <option value="weekly">Weekly view</option>
+              </select>
+            </label>
+          </div>
+          <button type="button" id="custom-add" class="primary-button">Add tracker</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Your custom trackers">
+        <div class="card-header">
+          <h3>Your trackers</h3>
+        </div>
+        <div class="card-body">
+          <div id="custom-trackers"></div>
+          <p class="card-helper" id="custom-empty-helper">No custom trackers yet.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span class="footer-text">Data is stored only on this device.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
