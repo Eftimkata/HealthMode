@@ -175,11 +175,35 @@
     setTheme(state.theme);
 
     const screens = Array.from(document.querySelectorAll('.screen'));
+    const bottomPill = document.querySelector('.bottom-carousel-pill');
+    const bottomItems = bottomPill
+      ? Array.from(bottomPill.querySelectorAll('.bottom-item'))
+      : [];
+
+    function updateBottomNav(name) {
+      if (!bottomPill || !bottomItems.length) return;
+      let activeIndex = 0;
+      bottomItems.forEach((item, index) => {
+        const target = item.getAttribute('data-go-screen');
+        const isActive = target === name;
+        item.classList.toggle('is-active', isActive);
+        if (isActive) activeIndex = index;
+      });
+      bottomPill.style.setProperty('--active-index', String(activeIndex));
+    }
+
     function switchScreen(name) {
       const id = `screen-${name}`;
       screens.forEach((sec) => {
         sec.classList.toggle('screen--active', sec.id === id);
       });
+      updateBottomNav(name);
+
+      // Show activity rings only on Home (main) screen
+      const rings = document.querySelector('.activity-rings');
+      if (rings) {
+        rings.style.display = name === 'main' ? 'flex' : 'none';
+      }
     }
 
     document.querySelectorAll('[data-go-screen]').forEach((btn) => {
@@ -188,6 +212,13 @@
         if (target) switchScreen(target);
       });
     });
+
+    // Ensure bottom carousel matches initial screen
+    updateBottomNav('main');
+
+    // Ensure rings are visible on initial Home screen only
+    const initialRings = document.querySelector('.activity-rings');
+    if (initialRings) initialRings.style.display = 'flex';
 
     document.querySelectorAll('.theme-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -632,53 +663,82 @@
     }
 
     // Main menu summaries
-    const menuWaterSummary = document.getElementById('menu-water-summary');
-    const menuDistanceSummary = document.getElementById('menu-distance-summary');
-    const menuWeightSummary = document.getElementById('menu-weight-summary');
-    const menuCustomSummary = document.getElementById('menu-custom-summary');
+    const menuWaterSummary = null;
+    const menuDistanceSummary = null;
+    const menuWeightSummary = null;
+    const menuCustomSummary = null;
+
+    function setRingProgress(circleId, pct) {
+      const circle = document.getElementById(circleId);
+      if (!circle) return;
+      const r = parseFloat(circle.getAttribute('r') || '0');
+      if (!r) return;
+      const C = 2 * Math.PI * r;
+      const clamped = Math.max(0, Math.min(100, pct || 0));
+      circle.style.strokeDasharray = `${C}`;
+      circle.style.strokeDashoffset = `${C * (1 - clamped / 100)}`;
+    }
+
+    function updateActivityRings() {
+      const distanceTextEl = document.getElementById('ring-distance-text');
+      const waterTextEl = document.getElementById('ring-water-text');
+      const customTextEl = document.getElementById('ring-custom-text');
+      const customCircle = document.getElementById('ring-custom');
+      const customBg = document.getElementById('ring-custom-bg');
+
+      // Distance ring
+      const distToday = getTodayAmount((state.distance && state.distance.byDate) || {});
+      const distGoal = Number((state.distance && state.distance.goalKm) || 0);
+      const distPct = percent(distToday, distGoal);
+      setRingProgress('ring-distance', distPct);
+      if (distanceTextEl) {
+        if (distGoal > 0) {
+          distanceTextEl.textContent = `Distance ${distToday} / ${distGoal} km`;
+        } else {
+          distanceTextEl.textContent = 'Distance 0 / 0 km';
+        }
+      }
+
+      // Water ring
+      const waterToday = getTodayAmount((state.water && state.water.byDate) || {});
+      const waterGoal = Number((state.water && state.water.goal) || 0);
+      const waterPct = percent(waterToday, waterGoal);
+      setRingProgress('ring-water', waterPct);
+      if (waterTextEl) {
+        if (waterGoal > 0) {
+          waterTextEl.textContent = `Water ${waterToday} / ${waterGoal} ml`;
+        } else {
+          waterTextEl.textContent = 'Water 0 / 0 ml';
+        }
+      }
+
+      // Custom ring (first custom tracker, percentage)
+      ensureCustomStructures();
+      const trackers = state.custom.trackers || [];
+      if (!trackers.length) {
+        if (customTextEl) customTextEl.style.display = 'none';
+        if (customCircle) customCircle.style.display = 'none';
+        if (customBg) customBg.style.display = 'none';
+      } else {
+        const tracker = trackers[0];
+        const periodKey = getCustomPeriodKey(tracker);
+        const value = getCustomValue(tracker.id, periodKey);
+        const goal = Number(tracker.goal || 0);
+        const pct = percent(value, goal);
+        setRingProgress('ring-custom', pct);
+
+        if (customCircle) customCircle.style.display = '';
+        if (customBg) customBg.style.display = '';
+        if (customTextEl) {
+          customTextEl.style.display = '';
+          const pctLabel = goal > 0 ? Math.round((value / goal) * 100) : 0;
+          customTextEl.textContent = `${tracker.name} ${pctLabel}%`;
+        }
+      }
+    }
 
     function updateHomeSummaries() {
-      if (menuWaterSummary) {
-        const today = getTodayAmount(state.water.byDate || {});
-        const goal = Number(state.water.goal || 0);
-        if (goal > 0) {
-          menuWaterSummary.textContent = `${today} / ${goal} ml today`;
-        } else {
-          menuWaterSummary.textContent = 'Set your daily water goal';
-        }
-      }
-
-      if (menuDistanceSummary) {
-        const today = getTodayAmount(state.distance.byDate || {});
-        const goal = Number(state.distance.goalKm || 0);
-        if (goal > 0) {
-          menuDistanceSummary.textContent = `${today} / ${goal} km today`;
-        } else {
-          menuDistanceSummary.textContent = 'Track km per day';
-        }
-      }
-
-      if (menuWeightSummary) {
-        ensureWeightWeeks();
-        const weeks = state.weight.weeks || {};
-        const allWeeks = Object.keys(weeks)
-          .map((k) => ({ k, v: weeks[k] }))
-          .filter((w) => w.v != null && !Number.isNaN(w.v));
-        if (allWeeks.length) {
-          const last = allWeeks.sort((a, b) => Number(a.k) - Number(b.k))[allWeeks.length - 1];
-          menuWeightSummary.textContent = `Last: ${last.v} ${state.weight.unit || 'kg'}`;
-        } else {
-          menuWeightSummary.textContent = 'Log your weight by week';
-        }
-      }
-
-      if (menuCustomSummary) {
-        ensureCustomStructures();
-        const count = state.custom.trackers.length;
-        if (count === 0) menuCustomSummary.textContent = 'Create your own trackers';
-        else if (count === 1) menuCustomSummary.textContent = '1 custom tracker';
-        else menuCustomSummary.textContent = `${count} custom trackers`;
-      }
+      updateActivityRings();
     }
 
     // Initial render
