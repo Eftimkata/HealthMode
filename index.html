@@ -41,8 +41,21 @@
       </div>
     </section>
 
-    <!-- Main screen (empty, navigation is via bottom pill) -->
+    <!-- Main screen (Home) -->
     <section id="screen-main" class="screen screen--active" aria-label="Main menu">
+      <section class="card strava-card" aria-label="Strava connection">
+        <h2 class="strava-title">Strava</h2>
+        <a href="https://www.strava.com/oauth/authorize?client_id=192113&response_type=code&redirect_uri=https%3A%2F%2Fhealth-mode.netlify.app%2F&approval_prompt=auto&scope=activity:read,activity:write" style=" display: inline-flex; align-items: center; justify-content: center; padding: 0.85rem 1.6rem; border-radius: 999px; background-color: #22c55e; color: #ffffff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; box-shadow: 0 8px 18px rgba(22, 163, 74, 0.35); transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.12s ease-out; -webkit-tap-highlight-color: transparent;" onclick="this.style.transform='scale(0.97)'; this.style.boxShadow='0 4px 10px rgba(22, 163, 74, 0.4)';" onmouseup="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 18px rgba(22, 163, 74, 0.35)';" ontouchend="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 18px rgba(22, 163, 74, 0.35)';">
+  Connect with Strava
+</a>
+        <div id="strava-details" class="strava-details" hidden>
+          <p class="strava-description">
+            Connect your Strava account to import your distance automatically. Your personal
+            API token is stored only on this device.
+          </p>
+          <p id="strava-status" class="strava-status"></p>
+        </div>
+      </section>
     </section>
 
     <!-- Water tracker -->
