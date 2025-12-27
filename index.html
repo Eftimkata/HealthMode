@@ -2,15 +2,597 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <title>HealthMode – Daily Tracker</title>
   <meta name="description" content="Healthy lifestyle tracker for water, distance, weight and custom habits." />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Use the uploaded logo as the favicon/tab icon -->
+  <link rel="icon" href="logo.jpg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* --- CORE STYLES --- */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    :root {
+      color-scheme: dark;
+      /* Dark mode defaults */
+      --bg-color: rgb(28, 28, 30);
+      --bg-elevated: rgb(72, 72, 74);
+      --header-bg: var(--bg-color);
+      --header-text: #f9fafb;
+      --text-color: #f9fafb;
+      --text-soft: #9ca3af;
+      --border-subtle: rgba(142, 142, 147, 0.5);
+      --card-bg: rgb(44, 44, 46);
+      --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.16);
+      --accent-soft-strong: rgba(34, 197, 94, 0.26);
+      --accent-gradient: linear-gradient(90deg, #22c55e, #a3e635);
+      --danger: #f97316;
+      --progress-track: rgba(58, 58, 60, 0.95);
+      --input-bg: rgb(44, 44, 46);
+      --strava-color: #FC4C02;
+    }
+
+    body[data-theme='light'] {
+      color-scheme: light;
+      --bg-color: rgb(242, 242, 246);
+      --bg-elevated: rgb(255, 255, 255);
+      --header-bg: var(--bg-color);
+      --header-text: #111827;
+      --text-color: #111827;
+      --text-soft: #6b7280;
+      --border-subtle: rgba(142, 142, 147, 0.3);
+      --card-bg: #ffffff;
+      --card-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --accent: #0ea5e9;
+      --accent-soft: rgba(14, 165, 233, 0.12);
+      --accent-soft-strong: rgba(14, 165, 233, 0.2);
+      --accent-gradient: linear-gradient(90deg, #0ea5e9, #22c55e);
+      --danger: #ea580c;
+      --progress-track: rgba(229, 231, 235, 0.9);
+      --input-bg: #f9fafb;
+    }
+
+    /* --- HEADER --- */
+    .app-header {
+      padding: 1.25rem 1.25rem 0.75rem;
+      background: var(--bg-color);
+      color: var(--header-text);
+    }
+
+    .app-header-top {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    
+    .app-title-text {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .theme-toggle {
+      padding: 0.18rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.2);
+      display: inline-flex;
+      gap: 0.18rem;
+    }
+
+    body[data-theme='light'] .theme-toggle {
+      background: rgba(148, 163, 184, 0.2);
+    }
+
+    .theme-toggle-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn.is-active {
+      background: #ffffff;
+      color: #111827;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.18);
+    }
+
+    body[data-theme='dark'] .theme-toggle-btn.is-active {
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    /* --- MAIN LAYOUT --- */
+    .app-main {
+      flex: 1;
+      padding: 0.5rem 1rem 6rem;
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* --- ACTIVITY RINGS --- */
+    .activity-rings {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .activity-rings-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .activity-rings-svg {
+      width: 140px;
+      height: 140px;
+      flex-shrink: 0;
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.35);
+      stroke-width: 11;
+    }
+
+    body[data-theme='light'] .ring-bg {
+      stroke: rgba(0, 0, 0, 0.08);
+    }
+
+    .ring-fg {
+      fill: none;
+      stroke-width: 11;
+      stroke-linecap: round;
+      stroke-dasharray: 0 999;
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.5s ease-out;
+    }
+
+    .ring-fg--distance { stroke: rgb(48, 209, 88); }
+    .ring-fg--water { stroke: rgb(0, 145, 255); }
+    .ring-fg--custom { stroke: rgb(255, 66, 69); }
+
+    .activity-rings-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .ring-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .ring-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .ring-row--distance { color: rgb(48, 209, 88); }
+    .ring-row--distance .ring-dot { background: rgb(48, 209, 88); }
+    
+    .ring-row--water { color: rgb(0, 145, 255); }
+    .ring-row--water .ring-dot { background: rgb(0, 145, 255); }
+
+    .ring-row--custom { color: rgb(255, 66, 69); }
+    .ring-row--custom .ring-dot { background: rgb(255, 66, 69); }
+
+    /* --- SCREENS --- */
+    .screen { display: none; animation: fadeIn 0.3s ease; }
+    .screen--active { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .screen-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .back-button {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      background: rgba(15, 23, 42, 0.1);
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+    
+    /* --- CARDS & INPUTS --- */
+    .card {
+      background: var(--card-bg);
+      border-radius: 1.2rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .card-header h3 { margin: 0; font-size: 1.1rem; }
+    .card-unit { font-size: 0.9rem; color: var(--text-soft); }
+
+    .field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .field input, .field select {
+      flex: 1;
+      padding: 0.5rem 0.8rem;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: inherit;
+      font-size: 1rem;
+      text-align: right;
+    }
+    
+    .field input:focus, .field select:focus {
+        outline: 2px solid var(--accent);
+        border-color: transparent;
+    }
+
+    .quick-buttons {
+      display: flex;
+      gap: 0.6rem;
+      margin: 1rem 0;
+    }
+
+    .quick-buttons button {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 0.8rem;
+      border: none;
+      background: var(--accent-soft);
+      color: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .quick-buttons button:active { background: var(--accent-soft-strong); }
+
+    .progress {
+      height: 0.8rem;
+      border-radius: 999px;
+      background: var(--progress-track);
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-gradient);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .link-button {
+        display: block;
+        margin: 1rem auto 0;
+        background: none;
+        border: none;
+        color: var(--danger);
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    
+    .primary-button {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 0.8rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.5rem;
+    }
+
+    /* --- STRAVA BUTTON (CUSTOM) --- */
+    .strava-card {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1.5rem;
+    }
+    
+    .strava-title {
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .strava-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.85rem 2rem;
+      border-radius: 999px;
+      background-color: var(--strava-color);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 8px 18px rgba(252, 76, 2, 0.35);
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+      margin: 0 auto;
+    }
+
+    .strava-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 10px rgba(252, 76, 2, 0.4);
+    }
+    
+    .strava-details {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-soft);
+        line-height: 1.5;
+        max-width: 400px;
+    }
+
+    /* --- WEIGHT LIST & GRAPH --- */
+    .weight-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .weight-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1rem;
+      align-items: center;
+    }
+    .weight-row span {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+    
+    /* Graph Container */
+    #weight-graph-wrapper {
+        margin-bottom: 1.5rem;
+        height: 200px;
+        width: 100%;
+        position: relative;
+    }
+    .chart-svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+    .chart-line {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    .chart-dot {
+        fill: var(--card-bg);
+        stroke: var(--accent);
+        stroke-width: 2;
+    }
+    .chart-grid-line {
+        stroke: var(--border-subtle);
+        stroke-width: 1;
+        stroke-dasharray: 4;
+    }
+    .chart-label {
+        font-size: 10px;
+        fill: var(--text-soft);
+    }
+
+    /* --- CALENDAR --- */
+    .calendar { margin-top: 0.5rem; }
+    .calendar-header { text-align: center; margin-bottom: 0.5rem; }
+    .calendar-title { font-size: 0.9rem; color: var(--text-soft); }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .calendar-day, .calendar-weekday {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      position: relative;
+    }
+    .calendar-weekday { color: var(--text-soft); font-size: 0.7rem; }
+    .calendar-day { border: 1px solid var(--border-subtle); }
+    .calendar-day--checked {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: bold;
+    }
+    .calendar-day-check {
+        position: absolute;
+        bottom: 2px;
+        font-size: 8px;
+    }
+
+    /* --- CUSTOM HABITS --- */
+    .custom-card {
+        border: 1px solid var(--border-subtle);
+        background: rgba(125,125,125,0.05);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .custom-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+    }
+    .custom-name { font-weight: 600; font-size: 1rem; }
+    .custom-subtitle { font-size: 0.8rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .custom-remove {
+        background: rgba(0,0,0,0.2);
+        border: none;
+        color: var(--text-soft);
+        padding: 0.3rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+    }
+    .week-list { list-style: none; padding: 0; margin: 0; }
+    .week-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .week-row:last-child { border-bottom: none; }
+    
+    /* --- NAVIGATION --- */
+    .bottom-carousel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+      pointer-events: none;
+    }
+
+    .bottom-carousel-inner {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      pointer-events: auto;
+    }
+
+    .bottom-carousel-pill {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      padding: 0.3rem;
+      position: relative;
+    }
+
+    .bottom-carousel-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        position: relative;
+    }
+
+    .bottom-carousel-indicator {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 20%; 
+      left: calc(var(--active-index, 0) * 20%);
+      transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bottom-carousel-indicator::after {
+        content: '';
+        width: 80%;
+        height: 80%;
+        background: var(--text-soft);
+        opacity: 0.15;
+        border-radius: 999px;
+        display: block;
+    }
+    
+    body[data-theme='light'] .bottom-carousel-indicator::after {
+        background: #000;
+        opacity: 0.08;
+    }
+
+    .bottom-item {
+      position: relative;
+      z-index: 1;
+      border: none;
+      background: transparent;
+      padding: 0.6rem 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-soft);
+      transition: color 0.3s;
+    }
+
+    .bottom-item i { font-size: 1.2rem; }
+    .bottom-item.is-active { color: var(--text-color); }
+    
+    .bottom-item--home.is-active { color: rgb(219, 55, 242); }
+    .bottom-item--water.is-active { color: rgb(0, 145, 255); }
+    .bottom-item--distance.is-active { color: rgb(48, 209, 88); }
+    .bottom-item--weight.is-active { color: rgb(255, 214, 0); }
+    .bottom-item--custom.is-active { color: rgb(255, 66, 69); }
+
+  </style>
 </head>
 <body data-theme="dark">
   <header class="app-header">
     <div class="app-header-top">
+      <h1 class="app-title-text">HealthMode</h1>
       <div class="theme-toggle" aria-label="Appearance">
         <button type="button" class="theme-toggle-btn" data-theme-choice="light">Light</button>
         <button type="button" class="theme-toggle-btn is-active" data-theme-choice="dark">Dark</button>
@@ -22,21 +604,34 @@
     <section class="activity-rings" aria-label="Today summary">
       <div class="activity-rings-inner">
         <svg class="activity-rings-svg" viewBox="0 0 176 176" aria-hidden="true">
+          <!-- Rotated so start is at top -->
           <g transform="rotate(-90 88 88)">
-            <circle class="ring-bg ring-bg--distance" cx="88" cy="88" r="79" />
-            <circle class="ring-fg ring-fg--distance" cx="88" cy="88" r="79" id="ring-distance" />
+            <!-- Distance (Outer) -->
+            <circle class="ring-bg" cx="88" cy="88" r="79" />
+            <circle class="ring-fg ring-fg--distance" cx="88" cy="88" r="79" id="ring-distance" stroke-dasharray="0 496" />
 
-            <circle class="ring-bg ring-bg--water" cx="88" cy="88" r="62" />
-            <circle class="ring-fg ring-fg--water" cx="88" cy="88" r="62" id="ring-water" />
+            <!-- Water (Middle) -->
+            <circle class="ring-bg" cx="88" cy="88" r="62" />
+            <circle class="ring-fg ring-fg--water" cx="88" cy="88" r="62" id="ring-water" stroke-dasharray="0 389" />
 
-            <circle class="ring-bg ring-bg--custom" cx="88" cy="88" r="44" id="ring-custom-bg" />
-            <circle class="ring-fg ring-fg--custom" cx="88" cy="88" r="44" id="ring-custom" />
+            <!-- Custom (Inner) -->
+            <circle class="ring-bg" cx="88" cy="88" r="44" id="ring-custom-bg" />
+            <circle class="ring-fg ring-fg--custom" cx="88" cy="88" r="44" id="ring-custom" stroke-dasharray="0 276" />
           </g>
         </svg>
         <div class="activity-rings-text">
-          <div class="ring-row ring-row--distance" id="ring-distance-text"></div>
-          <div class="ring-row ring-row--water" id="ring-water-text"></div>
-          <div class="ring-row ring-row--custom" id="ring-custom-text"></div>
+          <div class="ring-row ring-row--distance">
+              <span class="ring-dot"></span>
+              <span id="ring-distance-text">0 km</span>
+          </div>
+          <div class="ring-row ring-row--water">
+              <span class="ring-dot"></span>
+              <span id="ring-water-text">0 ml</span>
+          </div>
+          <div class="ring-row ring-row--custom">
+              <span class="ring-dot"></span>
+              <span id="ring-custom-text">0 Habits</span>
+          </div>
         </div>
       </div>
     </section>
@@ -44,30 +639,37 @@
     <!-- Main screen (Home) -->
     <section id="screen-main" class="screen screen--active" aria-label="Main menu">
       <section class="card strava-card" aria-label="Strava connection">
-        <h2 class="strava-title">Strava</h2>
-        <a href="https://www.strava.com/oauth/authorize?client_id=192113&response_type=code&redirect_uri=https%3A%2F%2Fhealth-mode.netlify.app%2F&approval_prompt=auto&scope=activity:read,activity:write" style=" display: inline-flex; align-items: center; justify-content: center; padding: 0.85rem 1.6rem; border-radius: 999px; background-color: #22c55e; color: #ffffff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; box-shadow: 0 8px 18px rgba(22, 163, 74, 0.35); transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.12s ease-out; -webkit-tap-highlight-color: transparent;" onclick="this.style.transform='scale(0.97)'; this.style.boxShadow='0 4px 10px rgba(22, 163, 74, 0.4)';" onmouseup="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 18px rgba(22, 163, 74, 0.35)';" ontouchend="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 18px rgba(22, 163, 74, 0.35)';">
-  Connect with Strava
-</a>
-        <div id="strava-details" class="strava-details" hidden>
-          <p class="strava-description">
-            Connect your Strava account to import your distance automatically. Your personal
-            API token is stored only on this device.
+        <h2 class="strava-title">Connect Service</h2>
+        <a href="#" class="strava-btn" id="strava-btn">
+            <i class="fa-brands fa-strava" style="margin-right: 8px;"></i> Connect with Strava
+        </a>
+        <div class="strava-details">
+          <p>
+            Connect your Strava account to import your distance automatically. 
           </p>
-          <p id="strava-status" class="strava-status"></p>
         </div>
       </section>
+      
+      <div class="card">
+          <div class="card-header">
+              <h3>Quick Summary</h3>
+          </div>
+          <p style="color: var(--text-soft); font-size: 0.9rem;">
+              Tap the icons below to log your daily activity.
+          </p>
+      </div>
     </section>
 
     <!-- Water tracker -->
     <section id="screen-water" class="screen" aria-label="Water tracker">
       <header class="screen-header">
-        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <button type="button" class="back-button" data-go-screen="main"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <h2>Water</h2>
       </header>
 
-      <section class="card" aria-labelledby="water-heading">
+      <section class="card">
         <div class="card-header">
-          <h3 id="water-heading">Daily water</h3>
+          <h3>Daily water</h3>
           <span class="card-unit">ml</span>
         </div>
         <div class="card-body">
@@ -79,7 +681,7 @@
             <span>Today</span>
             <input type="number" id="water-today" min="0" step="50" />
           </label>
-          <div class="quick-buttons" aria-label="Quick add water">
+          <div class="quick-buttons">
             <button type="button" data-add-water="250">+250</button>
             <button type="button" data-add-water="500">+500</button>
           </div>
@@ -90,12 +692,11 @@
         </div>
       </section>
 
-      <section class="card calendar-card" aria-label="Water calendar">
+      <section class="card">
         <div class="card-header">
           <h3>Water calendar</h3>
         </div>
-        <p class="card-helper">A day gets a check when you hit your goal.</p>
-        <div class="calendar" id="water-calendar">
+        <div class="calendar">
           <div class="calendar-header">
             <span class="calendar-title" id="water-calendar-title"></span>
           </div>
@@ -107,13 +708,13 @@
     <!-- Distance tracker -->
     <section id="screen-distance" class="screen" aria-label="Distance tracker">
       <header class="screen-header">
-        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
+        <button type="button" class="back-button" data-go-screen="main"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <h2>Distance</h2>
       </header>
 
-      <section class="card" aria-labelledby="distance-heading">
+      <section class="card">
         <div class="card-header">
-          <h3 id="distance-heading">Daily distance</h3>
+          <h3>Daily distance</h3>
           <span class="card-unit">km</span>
         </div>
         <div class="card-body">
@@ -125,7 +726,7 @@
             <span>Today</span>
             <input type="number" id="distance-today" min="0" step="0.1" />
           </label>
-          <div class="quick-buttons" aria-label="Quick add distance">
+          <div class="quick-buttons">
             <button type="button" data-add-distance="0.5">+0.5</button>
             <button type="button" data-add-distance="1">+1</button>
           </div>
@@ -136,12 +737,11 @@
         </div>
       </section>
 
-      <section class="card calendar-card" aria-label="Distance calendar">
+      <section class="card">
         <div class="card-header">
           <h3>Distance calendar</h3>
         </div>
-        <p class="card-helper">A day gets a check when you hit your goal.</p>
-        <div class="calendar" id="distance-calendar">
+        <div class="calendar">
           <div class="calendar-header">
             <span class="calendar-title" id="distance-calendar-title"></span>
           </div>
@@ -153,124 +753,928 @@
     <!-- Weight loss tracker -->
     <section id="screen-weight" class="screen" aria-label="Weight loss tracker">
       <header class="screen-header">
-        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
-        <h2>Weight loss</h2>
+        <button type="button" class="back-button" data-go-screen="main"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <h2>Weight</h2>
       </header>
 
-      <section class="card" aria-label="Weekly weight log">
+      <!-- GRAPH SECTION -->
+      <section class="card">
+          <div class="card-header">
+              <h3>Progress Graph</h3>
+          </div>
+          <div id="weight-graph-wrapper">
+              <!-- SVG Graph injected here by JS -->
+          </div>
+      </section>
+
+      <!-- LIST SECTION -->
+      <section class="card">
         <div class="card-header">
-          <h3>Weekly log</h3>
+          <h3>Weekly Log</h3>
           <span class="card-unit">kg</span>
         </div>
-        <div class="card-body weight-grid">
-          <div class="weight-row weight-row--header">
-            <span>Week</span>
-            <span>Weight</span>
-          </div>
-          <div id="weight-weeks"></div>
+        <div class="card-body">
+            <div class="weight-grid" id="weight-weeks">
+                <!-- Injected via JS -->
+            </div>
+            <p style="color: var(--text-soft); font-size: 0.8rem; margin-top: 1rem;">
+                Enter weight for each week to visualize progress.
+            </p>
         </div>
-        <p class="card-helper">Use one row per week. You can overwrite values anytime.</p>
       </section>
     </section>
 
     <!-- Custom trackers -->
     <section id="screen-custom" class="screen" aria-label="Custom trackers">
       <header class="screen-header">
-        <button type="button" class="back-button" data-go-screen="main">Main menu</button>
-        <h2>Custom habits</h2>
+        <button type="button" class="back-button" data-go-screen="main"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <h2>Habits</h2>
       </header>
 
-      <section class="card" aria-label="Create custom tracker">
+      <section class="card">
         <div class="card-header">
-          <h3>Create a tracker</h3>
+          <h3>Create Habit</h3>
         </div>
         <div class="card-body">
-          <div class="field-group">
-            <label class="field">
-              <span>Name</span>
-              <input type="text" id="custom-name" maxlength="32" placeholder="Walked up stairs" />
-            </label>
-            <label class="field">
-              <span>Unit</span>
-              <input type="text" id="custom-unit" maxlength="16" placeholder="stairs" />
-            </label>
-            <label class="field">
-              <span>Goal</span>
-              <input type="number" id="custom-goal" min="0" step="1" />
-            </label>
-            <label class="field">
-              <span>Calendar</span>
-              <select id="custom-mode">
-                <option value="daily">Daily calendar</option>
-                <option value="weekly">Weekly view</option>
-              </select>
-            </label>
-          </div>
-          <button type="button" id="custom-add" class="primary-button">Add tracker</button>
+            <div class="field">
+              <input type="text" id="custom-name" placeholder="Name (e.g. Read Book)" style="text-align: left;" />
+            </div>
+            <div class="field">
+                <input type="text" id="custom-unit" placeholder="Unit (e.g. pages)" style="text-align: left;" />
+            </div>
+            <div class="field">
+                <span>Goal</span>
+                <input type="number" id="custom-goal" placeholder="10" />
+            </div>
+            <div class="field">
+                <span>Mode</span>
+                <select id="custom-mode">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+          <button type="button" id="custom-add" class="primary-button">Add Habit</button>
         </div>
       </section>
 
-      <section class="card" aria-label="Your custom trackers">
+      <section class="card">
         <div class="card-header">
-          <h3>Your trackers</h3>
+          <h3>Your Habits</h3>
         </div>
-        <div class="card-body">
-          <div id="custom-trackers"></div>
-          <p class="card-helper" id="custom-empty-helper">No custom trackers yet.</p>
+        <div class="card-body" id="custom-trackers">
+          <p style="color:var(--text-soft); font-size:0.9rem;" id="custom-empty-helper">No habits yet.</p>
         </div>
       </section>
     </section>
   </main>
 
-  <section class="brand-bar" aria-label="App title">
-    <div>
-      <div class="brand-title">Health Mode</div>
-      <p class="brand-subtitle">Light, simple tracking for everyday habits</p>
-    </div>
-  </section>
-
-  <nav class="bottom-carousel" aria-label="Section switcher">
+  <!-- Navigation Pill -->
+  <nav class="bottom-carousel">
     <div class="bottom-carousel-inner">
-      <div class="bottom-carousel-pill" style="--active-index: 0">
-        <div class="bottom-carousel-indicator"></div>
+      <div class="bottom-carousel-pill">
+        
+        <div class="bottom-carousel-grid">
+            <div class="bottom-carousel-indicator"></div>
 
-        <button type="button" class="bottom-item bottom-item--home is-active" data-go-screen="main" data-index="0">
-          <span class="bottom-icon bottom-icon--home" aria-label="Home">
+            <button type="button" class="bottom-item bottom-item--home is-active" data-go-screen="main" data-index="0">
             <i class="fa-solid fa-house"></i>
-          </span>
-        </button>
+            </button>
 
-        <button type="button" class="bottom-item bottom-item--water" data-go-screen="water" data-index="1">
-          <span class="bottom-icon bottom-icon--water" aria-label="Water">
+            <button type="button" class="bottom-item bottom-item--water" data-go-screen="water" data-index="1">
             <i class="fa-solid fa-glass-water"></i>
-          </span>
-        </button>
+            </button>
 
-        <button type="button" class="bottom-item bottom-item--distance" data-go-screen="distance" data-index="2">
-          <span class="bottom-icon bottom-icon--distance" aria-label="Distance">
+            <button type="button" class="bottom-item bottom-item--distance" data-go-screen="distance" data-index="2">
             <i class="fa-solid fa-person-walking"></i>
-          </span>
-        </button>
+            </button>
 
-        <button type="button" class="bottom-item bottom-item--weight" data-go-screen="weight" data-index="3">
-          <span class="bottom-icon bottom-icon--weight" aria-label="Weight loss">
+            <button type="button" class="bottom-item bottom-item--weight" data-go-screen="weight" data-index="3">
             <i class="fa-solid fa-weight-scale"></i>
-          </span>
-        </button>
+            </button>
 
-        <button type="button" class="bottom-item bottom-item--custom" data-go-screen="custom" data-index="4">
-          <span class="bottom-icon bottom-icon--custom" aria-label="Custom habits">
+            <button type="button" class="bottom-item bottom-item--custom" data-go-screen="custom" data-index="4">
             <i class="fa-solid fa-hashtag"></i>
-          </span>
-        </button>
+            </button>
+        </div>
+
       </div>
     </div>
   </nav>
 
-  <footer class="app-footer">
-    <span class="footer-text">Data is stored only on this device.</span>
-  </footer>
+  <script>
+    (function () {
+      const STORAGE_KEY = 'healthModeData_v2';
 
-  <script src="app.js"></script>
+      function todayKey(date) {
+        const d = date ? new Date(date) : new Date();
+        return d.toISOString().slice(0, 10); // YYYY-MM-DD
+      }
+
+      function defaultState() {
+        return {
+          theme: 'dark',
+          water: {
+            goal: 2000,
+            byDate: {}, 
+          },
+          distance: {
+            goalKm: 5,
+            byDate: {},
+          },
+          weight: {
+            unit: 'kg',
+            weeks: {}, // "1".."12" -> weight
+          },
+          custom: {
+            trackers: [], 
+            values: {}, 
+          },
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return defaultState();
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return defaultState();
+
+          const base = defaultState();
+          const merged = {
+            ...base,
+            ...parsed,
+            water: { ...base.water, ...(parsed.water || {}) },
+            distance: { ...base.distance, ...(parsed.distance || {}) },
+            weight: { ...base.weight, ...(parsed.weight || {}) },
+            custom: {
+              ...base.custom,
+              ...(parsed.custom || {}),
+              trackers: (parsed.custom && parsed.custom.trackers) || [],
+              values: (parsed.custom && parsed.custom.values) || {},
+            },
+          };
+          return merged;
+        } catch (e) {
+          console.warn('HealthMode: could not load saved data, using defaults.', e);
+          return defaultState();
+        }
+      }
+
+      let state = loadState();
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+          console.warn('HealthMode: could not save data.', e);
+        }
+      }
+
+      function clampNumber(value, min) {
+        const n = Number(value);
+        if (Number.isNaN(n)) return min;
+        return Math.max(min, n);
+      }
+
+      function percent(done, goal) {
+        const g = Number(goal || 0);
+        if (!g || g <= 0) return 0;
+        const d = Number(done || 0);
+        return Math.min(100, Math.round((d / g) * 100));
+      }
+
+      function setTheme(theme) {
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = 'dark';
+        }
+        state.theme = theme;
+        document.body.setAttribute('data-theme', theme);
+        const buttons = document.querySelectorAll('.theme-toggle-btn');
+        buttons.forEach((btn) => {
+          btn.classList.toggle('is-active', btn.getAttribute('data-theme-choice') === theme);
+        });
+        saveState();
+      }
+
+      function getTodayAmount(map) {
+        const key = todayKey();
+        return Number((map && map[key]) || 0);
+      }
+
+      function setTodayAmount(map, value) {
+        const key = todayKey();
+        map[key] = clampNumber(value, 0);
+      }
+
+      function isDayCompleted(map, goal, dateKey) {
+        const amount = Number((map && map[dateKey]) || 0);
+        const g = Number(goal || 0);
+        return g > 0 && amount >= g;
+      }
+
+      function renderMonthCalendar(gridEl, titleEl, dateForMonth, isCompletedFn) {
+        if (!gridEl || !titleEl) return;
+
+        const baseDate = dateForMonth ? new Date(dateForMonth) : new Date();
+        const year = baseDate.getFullYear();
+        const month = baseDate.getMonth();
+        const firstOfMonth = new Date(year, month, 1);
+        const firstWeekday = firstOfMonth.getDay(); // 0-6
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        titleEl.textContent = firstOfMonth.toLocaleDateString(undefined, {
+          month: 'long',
+          year: 'numeric',
+        });
+
+        const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        gridEl.innerHTML = '';
+
+        // Weekday header row
+        weekdays.forEach((label) => {
+          const d = document.createElement('div');
+          d.className = 'calendar-weekday';
+          d.textContent = label;
+          gridEl.appendChild(d);
+        });
+
+        // Empty cells before month starts
+        for (let i = 0; i < firstWeekday; i += 1) {
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day calendar-day-empty';
+          gridEl.appendChild(cell);
+        }
+
+        for (let day = 1; day <= daysInMonth; day += 1) {
+          const d = new Date(year, month, day);
+          const key = todayKey(d);
+          const completed = isCompletedFn(key);
+
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day';
+          if (completed) cell.classList.add('calendar-day--checked');
+
+          const num = document.createElement('span');
+          num.className = 'calendar-day-number';
+          num.textContent = String(day);
+          cell.appendChild(num);
+
+          if (completed) {
+            const check = document.createElement('span');
+            check.className = 'calendar-day-check';
+            check.textContent = '✓';
+            cell.appendChild(check);
+          }
+
+          gridEl.appendChild(cell);
+        }
+      }
+
+      function init() {
+        const prefersLight =
+          window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (!state.theme) {
+          state.theme = prefersLight ? 'light' : 'dark';
+        }
+        setTheme(state.theme);
+
+        const screens = Array.from(document.querySelectorAll('.screen'));
+        const bottomPill = document.querySelector('.bottom-carousel-pill');
+        const bottomItems = bottomPill
+          ? Array.from(bottomPill.querySelectorAll('.bottom-item'))
+          : [];
+
+        function updateBottomNav(name) {
+          if (!bottomPill || !bottomItems.length) return;
+          let activeIndex = 0;
+          bottomItems.forEach((item, index) => {
+            const target = item.getAttribute('data-go-screen');
+            const isActive = target === name;
+            item.classList.toggle('is-active', isActive);
+            if (isActive) activeIndex = index;
+          });
+          bottomPill.style.setProperty('--active-index', String(activeIndex));
+        }
+
+        function switchScreen(name) {
+          const id = `screen-${name}`;
+          screens.forEach((sec) => {
+            sec.classList.toggle('screen--active', sec.id === id);
+          });
+          updateBottomNav(name);
+
+          // Show activity rings only on Home (main) screen
+          const rings = document.querySelector('.activity-rings');
+          if (rings) {
+            rings.style.display = name === 'main' ? 'flex' : 'none';
+          }
+        }
+
+        document.querySelectorAll('[data-go-screen]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-go-screen');
+            if (target) switchScreen(target);
+          });
+        });
+
+        // Ensure bottom carousel matches initial screen
+        updateBottomNav('main');
+
+        // Ensure rings are visible on initial Home screen only
+        const initialRings = document.querySelector('.activity-rings');
+        if (initialRings) initialRings.style.display = 'flex';
+
+        document.querySelectorAll('.theme-toggle-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const theme = btn.getAttribute('data-theme-choice');
+            setTheme(theme);
+          });
+        });
+
+        // Water DOM
+        const waterGoalInput = document.getElementById('water-goal');
+        const waterTodayInput = document.getElementById('water-today');
+        const waterProgress = document.getElementById('water-progress');
+        const waterReset = document.getElementById('water-reset');
+        const waterCalTitle = document.getElementById('water-calendar-title');
+        const waterCalGrid = document.getElementById('water-calendar-grid');
+
+        function updateWaterUI() {
+          if (!state.water) state.water = { goal: 2000, byDate: {} };
+          const todayAmount = getTodayAmount(state.water.byDate);
+          if (waterGoalInput) waterGoalInput.value = state.water.goal;
+          if (waterTodayInput) waterTodayInput.value = todayAmount;
+          const pct = percent(todayAmount, state.water.goal);
+          if (waterProgress) waterProgress.style.width = `${pct}%`;
+          renderMonthCalendar(
+            waterCalGrid,
+            waterCalTitle,
+            new Date(),
+            (dateKey) => isDayCompleted(state.water.byDate, state.water.goal, dateKey)
+          );
+        }
+
+        if (waterGoalInput && waterTodayInput) {
+          const syncWater = () => {
+            state.water.goal = clampNumber(waterGoalInput.value, 0);
+            setTodayAmount(state.water.byDate, waterTodayInput.value);
+            saveState();
+            updateWaterUI();
+            updateHomeSummaries();
+          };
+
+          ['change', 'blur'].forEach((evt) => {
+            waterGoalInput.addEventListener(evt, syncWater);
+            waterTodayInput.addEventListener(evt, syncWater);
+          });
+
+          document.querySelectorAll('[data-add-water]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const amount = Number(btn.getAttribute('data-add-water')) || 0;
+              const current = getTodayAmount(state.water.byDate);
+              const next = clampNumber(current + amount, 0);
+              if (waterTodayInput) waterTodayInput.value = next;
+              syncWater();
+            });
+          });
+
+          if (waterReset) {
+            waterReset.addEventListener('click', () => {
+              setTodayAmount(state.water.byDate, 0);
+              if (waterTodayInput) waterTodayInput.value = 0;
+              saveState();
+              updateWaterUI();
+              updateHomeSummaries();
+            });
+          }
+        }
+
+        // Distance DOM
+        const distanceGoalInput = document.getElementById('distance-goal');
+        const distanceTodayInput = document.getElementById('distance-today');
+        const distanceProgress = document.getElementById('distance-progress');
+        const distanceReset = document.getElementById('distance-reset');
+        const distanceCalTitle = document.getElementById('distance-calendar-title');
+        const distanceCalGrid = document.getElementById('distance-calendar-grid');
+
+        function updateDistanceUI() {
+          if (!state.distance) state.distance = { goalKm: 5, byDate: {} };
+          const todayAmount = getTodayAmount(state.distance.byDate);
+          if (distanceGoalInput) distanceGoalInput.value = state.distance.goalKm;
+          if (distanceTodayInput) distanceTodayInput.value = todayAmount;
+          const pct = percent(todayAmount, state.distance.goalKm);
+          if (distanceProgress) distanceProgress.style.width = `${pct}%`;
+          renderMonthCalendar(
+            distanceCalGrid,
+            distanceCalTitle,
+            new Date(),
+            (dateKey) => isDayCompleted(state.distance.byDate, state.distance.goalKm, dateKey)
+          );
+        }
+
+        if (distanceGoalInput && distanceTodayInput) {
+          const syncDistance = () => {
+            state.distance.goalKm = clampNumber(distanceGoalInput.value, 0);
+            setTodayAmount(state.distance.byDate, distanceTodayInput.value);
+            saveState();
+            updateDistanceUI();
+            updateHomeSummaries();
+          };
+
+          ['change', 'blur'].forEach((evt) => {
+            distanceGoalInput.addEventListener(evt, syncDistance);
+            distanceTodayInput.addEventListener(evt, syncDistance);
+          });
+
+          document.querySelectorAll('[data-add-distance]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const amount = Number(btn.getAttribute('data-add-distance')) || 0;
+              const current = getTodayAmount(state.distance.byDate);
+              const next = Math.max(0, Number((current + amount).toFixed(2)));
+              if (distanceTodayInput) distanceTodayInput.value = next;
+              syncDistance();
+            });
+          });
+
+          if (distanceReset) {
+            distanceReset.addEventListener('click', () => {
+              setTodayAmount(state.distance.byDate, 0);
+              if (distanceTodayInput) distanceTodayInput.value = 0;
+              saveState();
+              updateDistanceUI();
+              updateHomeSummaries();
+            });
+          }
+        }
+
+        // Weight weeks
+        const weightWeeksContainer = document.getElementById('weight-weeks');
+        const weightGraphContainer = document.getElementById('weight-graph-wrapper');
+
+        function ensureWeightWeeks() {
+          if (!state.weight) state.weight = { unit: 'kg', weeks: {} };
+          if (!state.weight.weeks) state.weight.weeks = {};
+        }
+
+        function renderWeightGraph() {
+            if(!weightGraphContainer) return;
+            ensureWeightWeeks();
+            const weeks = state.weight.weeks;
+            
+            // Get data points
+            let data = [];
+            for(let i=1; i<=12; i++) {
+                if(weeks[String(i)] !== undefined && weeks[String(i)] !== null) {
+                    data.push({ x: i, y: Number(weeks[String(i)]) });
+                }
+            }
+
+            if(data.length < 2) {
+                weightGraphContainer.innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-soft); font-size:0.8rem;">Log at least 2 weeks to see graph</div>';
+                return;
+            }
+
+            // Determine scales
+            const weights = data.map(d => d.y);
+            let minW = Math.min(...weights) - 2;
+            let maxW = Math.max(...weights) + 2;
+            if(minW < 0) minW = 0;
+            
+            // SVG Dim
+            const width = weightGraphContainer.offsetWidth || 300;
+            const height = 200;
+            const padding = 20;
+
+            const mapX = (x) => padding + ((x - 1) / 11) * (width - 2 * padding);
+            const mapY = (y) => height - padding - ((y - minW) / (maxW - minW)) * (height - 2 * padding);
+
+            let pathD = "";
+            let dots = "";
+
+            data.forEach((p, idx) => {
+                const px = mapX(p.x);
+                const py = mapY(p.y);
+                if(idx === 0) pathD += `M ${px} ${py} `;
+                else pathD += `L ${px} ${py} `;
+                
+                dots += `<circle cx="${px}" cy="${py}" r="4" class="chart-dot" />`;
+                dots += `<text x="${px}" y="${height - 5}" text-anchor="middle" class="chart-label">W${p.x}</text>`;
+            });
+
+            const svg = `
+                <svg class="chart-svg" viewBox="0 0 ${width} ${height}">
+                    <path d="${pathD}" class="chart-line" />
+                    ${dots}
+                    <text x="${padding}" y="${12}" class="chart-label">${maxW.toFixed(1)}</text>
+                    <text x="${padding}" y="${height - padding - 5}" class="chart-label">${minW.toFixed(1)}</text>
+                </svg>
+            `;
+            
+            weightGraphContainer.innerHTML = svg;
+        }
+
+        function renderWeightWeeks() {
+          ensureWeightWeeks();
+          renderWeightGraph();
+          if (!weightWeeksContainer) return;
+          weightWeeksContainer.innerHTML = '';
+          const weeks = 12;
+          for (let i = 1; i <= weeks; i += 1) {
+            const row = document.createElement('div');
+            row.className = 'weight-row';
+
+            const label = document.createElement('span');
+            label.textContent = `Week ${i}`;
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.step = '0.1';
+            input.setAttribute('data-weight-week', String(i));
+            const stored = state.weight.weeks[String(i)];
+            if (stored != null) input.value = stored;
+
+            row.appendChild(label);
+            row.appendChild(input);
+            weightWeeksContainer.appendChild(row);
+          }
+        }
+
+        if (weightWeeksContainer) {
+          renderWeightWeeks();
+          weightWeeksContainer.addEventListener('change', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            const week = target.getAttribute('data-weight-week');
+            if (!week) return;
+            ensureWeightWeeks();
+            const val = target.value === '' ? null : Number(target.value);
+            if (val == null || Number.isNaN(val)) {
+              delete state.weight.weeks[week];
+            } else {
+              state.weight.weeks[week] = val;
+            }
+            saveState();
+            renderWeightGraph(); // Update graph instantly
+            updateHomeSummaries();
+          });
+        }
+
+        // Custom trackers
+        const customNameInput = document.getElementById('custom-name');
+        const customUnitInput = document.getElementById('custom-unit');
+        const customGoalInput = document.getElementById('custom-goal');
+        const customModeSelect = document.getElementById('custom-mode');
+        const customAddButton = document.getElementById('custom-add');
+        const customTrackersContainer = document.getElementById('custom-trackers');
+        const customEmptyHelper = document.getElementById('custom-empty-helper');
+
+        function ensureCustomStructures() {
+          if (!state.custom) state.custom = { trackers: [], values: {} };
+          if (!Array.isArray(state.custom.trackers)) state.custom.trackers = [];
+          if (!state.custom.values) state.custom.values = {};
+        }
+
+        function getCustomPeriodKey(tracker, dateObj) {
+          const d = dateObj || new Date();
+          if (tracker.mode === 'weekly') {
+            const created = tracker.createdAt ? new Date(tracker.createdAt) : new Date();
+            const diffMs = d - created;
+            const diffDays = Math.floor(diffMs / 86400000);
+            const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+            return `w${weekIndex + 1}`; // w1, w2, ...
+          }
+          return todayKey(d);
+        }
+
+        function getCustomValue(trackerId, periodKey) {
+          const store = state.custom.values[trackerId] || {};
+          return Number(store[periodKey] || 0);
+        }
+
+        function setCustomValue(trackerId, periodKey, value) {
+          if (!state.custom.values[trackerId]) state.custom.values[trackerId] = {};
+          state.custom.values[trackerId][periodKey] = clampNumber(value, 0);
+        }
+
+        function renderCustomTrackers() {
+          ensureCustomStructures();
+          if (!customTrackersContainer) return;
+
+          customTrackersContainer.innerHTML = '';
+          if (customEmptyHelper) {
+            customEmptyHelper.style.display = state.custom.trackers.length ? 'none' : 'block';
+          }
+
+          state.custom.trackers.forEach((tracker) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-card';
+            wrapper.setAttribute('data-tracker-id', tracker.id);
+
+            const header = document.createElement('div');
+            header.className = 'custom-card-header';
+
+            const titleWrap = document.createElement('div');
+            const nameEl = document.createElement('div');
+            nameEl.className = 'custom-name';
+            nameEl.textContent = tracker.name;
+            const subtitle = document.createElement('div');
+            subtitle.className = 'custom-subtitle';
+            subtitle.textContent = `Goal: ${tracker.goal} ${tracker.unit} • ${
+              tracker.mode === 'weekly' ? 'weekly' : 'daily'
+            }`;
+            titleWrap.appendChild(nameEl);
+            titleWrap.appendChild(subtitle);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'custom-remove';
+            removeBtn.textContent = 'Remove';
+            removeBtn.setAttribute('data-remove-id', tracker.id);
+
+            header.appendChild(titleWrap);
+            header.appendChild(removeBtn);
+
+            const body = document.createElement('div');
+            body.className = 'custom-body';
+
+            const field = document.createElement('label');
+            field.className = 'field';
+            const span = document.createElement('span');
+            span.textContent = tracker.mode === 'weekly' ? 'This week' : 'Today';
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.step = '1';
+            input.setAttribute('data-custom-id', tracker.id);
+            const key = getCustomPeriodKey(tracker);
+            const currentVal = getCustomValue(tracker.id, key);
+            input.value = currentVal;
+            field.appendChild(span);
+            field.appendChild(input);
+
+            const quick = document.createElement('div');
+            quick.className = 'quick-buttons';
+            [1, 5].forEach((inc) => {
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'custom-add-amount';
+              b.setAttribute('data-custom-id', tracker.id);
+              b.setAttribute('data-amount', String(inc));
+              b.textContent = `+${inc}`;
+              quick.appendChild(b);
+            });
+
+            const calendarWrap = document.createElement('div');
+            calendarWrap.className = 'custom-calendar';
+            calendarWrap.setAttribute('data-calendar-for', tracker.id);
+
+            body.appendChild(field);
+            body.appendChild(quick);
+            body.appendChild(calendarWrap);
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(body);
+
+            customTrackersContainer.appendChild(wrapper);
+          });
+
+          renderCustomCalendars();
+        }
+
+        function renderCustomCalendars() {
+          ensureCustomStructures();
+          if (!customTrackersContainer) return;
+
+          state.custom.trackers.forEach((tracker) => {
+            const wrap = customTrackersContainer.querySelector(
+              `[data-calendar-for="${tracker.id}"]`
+            );
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            if (tracker.mode === 'weekly') {
+              const list = document.createElement('ul');
+              list.className = 'week-list';
+
+              for (let i = 1; i <= 12; i += 1) {
+                const li = document.createElement('li');
+                li.className = 'week-row';
+                const label = document.createElement('span');
+                label.className = 'week-row-label';
+                label.textContent = `Week ${i}`;
+                const check = document.createElement('span');
+                check.className = 'week-row-check';
+                const key = `w${i}`;
+                const value = getCustomValue(tracker.id, key);
+                if (tracker.goal > 0 && value >= tracker.goal) {
+                  check.textContent = '✓';
+                  check.style.color = 'var(--accent)';
+                } else {
+                  check.textContent = '';
+                }
+                li.appendChild(label);
+                li.appendChild(check);
+                list.appendChild(li);
+              }
+
+              wrap.appendChild(list);
+            } else {
+              const title = document.createElement('div');
+              title.className = 'calendar-header';
+              const titleText = document.createElement('span');
+              titleText.className = 'calendar-title';
+              title.appendChild(titleText);
+              const grid = document.createElement('div');
+              grid.className = 'calendar-grid';
+              wrap.appendChild(title);
+              wrap.appendChild(grid);
+
+              renderMonthCalendar(grid, titleText, new Date(), (dateKey) => {
+                const amount = getCustomValue(tracker.id, dateKey);
+                return tracker.goal > 0 && amount >= tracker.goal;
+              });
+            }
+          });
+        }
+
+        if (customAddButton) {
+          customAddButton.addEventListener('click', () => {
+            ensureCustomStructures();
+            const name = (customNameInput && customNameInput.value.trim()) || '';
+            const unit = (customUnitInput && customUnitInput.value.trim()) || '';
+            const goalVal = customGoalInput ? Number(customGoalInput.value) : 0;
+            const mode = (customModeSelect && customModeSelect.value) || 'daily';
+
+            if (!name || Number.isNaN(goalVal)) return;
+
+            const tracker = {
+              id: `t_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+              name,
+              unit: unit || 'units',
+              goal: clampNumber(goalVal, 0),
+              mode: mode === 'weekly' ? 'weekly' : 'daily',
+              createdAt: todayKey(),
+            };
+
+            state.custom.trackers.push(tracker);
+            saveState();
+
+            if (customNameInput) customNameInput.value = '';
+            if (customUnitInput) customUnitInput.value = '';
+            if (customGoalInput) customGoalInput.value = '';
+
+            renderCustomTrackers();
+            updateHomeSummaries();
+          });
+        }
+
+        if (customTrackersContainer) {
+          customTrackersContainer.addEventListener('click', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) return;
+
+            if (target.matches('.custom-remove')) {
+              const id = target.getAttribute('data-remove-id');
+              if (!id) return;
+              ensureCustomStructures();
+              state.custom.trackers = state.custom.trackers.filter((t) => t.id !== id);
+              delete state.custom.values[id];
+              saveState();
+              renderCustomTrackers();
+              updateHomeSummaries();
+              return;
+            }
+
+            if (target.matches('.custom-add-amount')) {
+              const id = target.getAttribute('data-custom-id');
+              const amount = Number(target.getAttribute('data-amount')) || 0;
+              if (!id) return;
+              ensureCustomStructures();
+              const tracker = state.custom.trackers.find((t) => t.id === id);
+              if (!tracker) return;
+              const periodKey = getCustomPeriodKey(tracker);
+              const current = getCustomValue(id, periodKey);
+              const next = clampNumber(current + amount, 0);
+              setCustomValue(id, periodKey, next);
+
+              const input = customTrackersContainer.querySelector(
+                `input[data-custom-id="${id}"]`
+              );
+              if (input) input.value = next;
+
+              saveState();
+              renderCustomCalendars();
+              updateHomeSummaries();
+            }
+          });
+
+          customTrackersContainer.addEventListener('change', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            const id = target.getAttribute('data-custom-id');
+            if (!id) return;
+            ensureCustomStructures();
+            const tracker = state.custom.trackers.find((t) => t.id === id);
+            if (!tracker) return;
+            const periodKey = getCustomPeriodKey(tracker);
+            const val = target.value === '' ? 0 : Number(target.value);
+            if (!Number.isNaN(val)) {
+              setCustomValue(id, periodKey, val);
+              saveState();
+              renderCustomCalendars();
+              updateHomeSummaries();
+            }
+          });
+        }
+
+        function setRingProgress(circleId, pct) {
+          const circle = document.getElementById(circleId);
+          if (!circle) return;
+          const r = parseFloat(circle.getAttribute('r') || '0');
+          if (!r) return;
+          const C = 2 * Math.PI * r;
+          const clamped = Math.max(0, Math.min(100, pct || 0));
+          // stroke-dasharray: C
+          // stroke-dashoffset: C * (1 - pct)
+          circle.style.strokeDasharray = `${C}`;
+          circle.style.strokeDashoffset = `${C * (1 - clamped / 100)}`;
+        }
+
+        function updateActivityRings() {
+          const distanceTextEl = document.getElementById('ring-distance-text');
+          const waterTextEl = document.getElementById('ring-water-text');
+          const customTextEl = document.getElementById('ring-custom-text');
+          const customCircle = document.getElementById('ring-custom');
+          const customBg = document.getElementById('ring-custom-bg');
+
+          // Distance ring
+          const distToday = getTodayAmount((state.distance && state.distance.byDate) || {});
+          const distGoal = Number((state.distance && state.distance.goalKm) || 0);
+          const distPct = percent(distToday, distGoal);
+          setRingProgress('ring-distance', distPct);
+          if (distanceTextEl) {
+            if (distGoal > 0) {
+              distanceTextEl.textContent = `${distToday} / ${distGoal} km`;
+            } else {
+              distanceTextEl.textContent = '0 / 0 km';
+            }
+          }
+
+          // Water ring
+          const waterToday = getTodayAmount((state.water && state.water.byDate) || {});
+          const waterGoal = Number((state.water && state.water.goal) || 0);
+          const waterPct = percent(waterToday, waterGoal);
+          setRingProgress('ring-water', waterPct);
+          if (waterTextEl) {
+            if (waterGoal > 0) {
+              waterTextEl.textContent = `${waterToday} / ${waterGoal} ml`;
+            } else {
+              waterTextEl.textContent = '0 / 0 ml';
+            }
+          }
+
+          // Custom ring
+          ensureCustomStructures();
+          const trackers = state.custom.trackers || [];
+          if (!trackers.length) {
+            if (customTextEl) customTextEl.style.display = 'none';
+            if (customCircle) customCircle.style.display = 'none';
+            if (customBg) customBg.style.display = 'none';
+          } else {
+            const tracker = trackers[0];
+            const periodKey = getCustomPeriodKey(tracker);
+            const value = getCustomValue(tracker.id, periodKey);
+            const goal = Number(tracker.goal || 0);
+            const pct = percent(value, goal);
+            setRingProgress('ring-custom', pct);
+
+            if (customCircle) customCircle.style.display = '';
+            if (customBg) customBg.style.display = '';
+            if (customTextEl) {
+              customTextEl.style.display = '';
+              const pctLabel = goal > 0 ? Math.round((value / goal) * 100) : 0;
+              customTextEl.textContent = `${tracker.name} ${pctLabel}%`;
+            }
+          }
+        }
+
+        function updateHomeSummaries() {
+          updateActivityRings();
+        }
+
+        // Init Calls
+        updateWaterUI();
+        updateDistanceUI();
+        renderWeightWeeks();
+        renderCustomTrackers();
+        updateHomeSummaries();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
 </body>
 </html>
